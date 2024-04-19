@@ -1,8 +1,16 @@
 <?php
 
+declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace Ella123\HyperfUtils;
-
 
 use Closure;
 use Countable;
@@ -29,10 +37,11 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
+
 use function Hyperf\Support\make;
 
 /**
- * 是否为空
+ * 是否为空.
  */
 function blank(mixed $value): bool
 {
@@ -56,15 +65,12 @@ function blank(mixed $value): bool
 }
 
 /**
- * 过滤数组
- * @param  array  $array
- * @return array
+ * 过滤数组.
  */
 function arrayFilterFilled(array $array): array
 {
-    return array_filter($array, static fn($item) => !blank($item));
+    return array_filter($array, static fn ($item) => ! blank($item));
 }
-
 
 /**
  * 获取容器实例.
@@ -77,7 +83,7 @@ function app(): ContainerInterface
 /**
  * 日志组件.
  *
- * @param  string  $group  日志配置
+ * @param string $group 日志配置
  */
 function logger(string $name = 'default', string $group = 'default'): LoggerInterface
 {
@@ -136,9 +142,9 @@ function realIp(mixed $request = null): mixed
 /**
  * 投递队列.
  *
- * @param  Job  $job  异步Job
- * @param  int  $delay  延迟时间-秒
- * @param  string  $driver  消息队列驱动
+ * @param Job $job 异步Job
+ * @param int $delay 延迟时间-秒
+ * @param string $driver 消息队列驱动
  */
 function asyncQueue(Job $job, int $delay = 0, string $driver = 'default'): void
 {
@@ -148,9 +154,9 @@ function asyncQueue(Job $job, int $delay = 0, string $driver = 'default'): void
 /**
  * 页面重定向.
  *
- * @param  string  $url  跳转URL
- * @param  int  $status  HTTP状态码
- * @param  string  $schema  协议
+ * @param string $url 跳转URL
+ * @param int $status HTTP状态码
+ * @param string $schema 协议
  */
 function redirect(string $url, int $status = 302, string $schema = 'http'): ResponseInterface
 {
@@ -161,12 +167,12 @@ function redirect(string $url, int $status = 302, string $schema = 'http'): Resp
 /**
  * 数据缓存.
  *
- * @param  string  $key  缓存KEY
- * @param  null|DateInterval|int  $ttl  缓存时间
+ * @param string $key 缓存KEY
+ * @param null|DateInterval|int $ttl 缓存时间
  */
 function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mixed
 {
-    if (!empty($value = cache()->get($key))) {
+    if (! empty($value = cache()->get($key))) {
         return $value;
     }
 
@@ -180,8 +186,8 @@ function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mi
 /**
  * 修改配置项.
  *
- * @param  string  $key  identifier of the entry to set
- * @param  mixed  $value  the value that save to container
+ * @param string $key identifier of the entry to set
+ * @param mixed $value the value that save to container
  *
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
@@ -194,9 +200,9 @@ function configSet(string $key, mixed $value): void
 /**
  * 如果给定条件为真，则抛出给定异常。
  *
- * @param  mixed  $condition  判断条件
- * @param  string|Throwable  $exception  指定异常信息(RuntimeException)|抛出异常
- * @param  mixed  ...$parameters  异常自定义参数
+ * @param mixed $condition 判断条件
+ * @param string|Throwable $exception 指定异常信息(RuntimeException)|抛出异常
+ * @param mixed ...$parameters 异常自定义参数
  *
  * @return mixed 返回条件数据
  * @throws Throwable
@@ -215,21 +221,17 @@ function throwIf(mixed $condition, string|Throwable $exception = 'RuntimeExcepti
 }
 
 /**
- * 异常终止
- * @param  string  $message
- * @param  int  $code
- * @return void
+ * 异常终止.
  */
 function abort(string $message, int $code = 500): void
 {
     throw new RuntimeException(message: $message, code: $code);
 }
 
-
 /**
  * redis 用例.
  *
- * @param  string  $driver  redis实例
+ * @param string $driver redis实例
  */
 function redis(string $driver = 'default'): RedisProxy
 {
@@ -239,9 +241,9 @@ function redis(string $driver = 'default'): RedisProxy
 /**
  * 获取指定 annotation.
  *
- * @param  string  $class  查询类
- * @param  string  $method  查询方法
- * @param  string  $annotationTarget  指定注解类
+ * @param string $class 查询类
+ * @param string $method 查询方法
+ * @param string $annotationTarget 指定注解类
  *
  * @throws AnnotationException
  */
@@ -260,7 +262,7 @@ function annotationCollector(
     }
 
     $classAnnotation = AnnotationCollector::getClassAnnotations($class)[$annotationTarget] ?? null;
-    if (!$classAnnotation instanceof $annotationTarget) {
+    if (! $classAnnotation instanceof $annotationTarget) {
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
