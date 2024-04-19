@@ -1,5 +1,5 @@
-# component-creator
+# ella123/hyperf-utils
 
 ```
-composer create-project hyperf/component-creator
+composer require ella123/hyperf-utils
 ```
