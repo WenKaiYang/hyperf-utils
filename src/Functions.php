@@ -25,7 +25,6 @@ use Hyperf\Di\Annotation\AbstractAnnotation;
 use Hyperf\Di\Annotation\AnnotationCollector;
 use Hyperf\Di\Exception\AnnotationException;
 use Hyperf\Engine\Contract\Http\V2\RequestInterface;
-use Hyperf\Engine\Contract\Http\V2\ResponseInterface;
 use Hyperf\Logger\LoggerFactory;
 use Hyperf\Redis\RedisFactory;
 use Hyperf\Redis\RedisProxy;
@@ -33,12 +32,12 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Throwable;
-
-use function Hyperf\Support\make;
 
 /**
  * 是否为空.
@@ -69,7 +68,7 @@ function blank(mixed $value): bool
  */
 function arrayFilterFilled(array $array): array
 {
-    return array_filter($array, static fn ($item) => ! blank($item));
+    return array_filter($array, static fn ($item) => !blank($item));
 }
 
 /**
@@ -83,44 +82,105 @@ function app(): ContainerInterface
 /**
  * 日志组件.
  *
- * @param string $group 日志配置
+ * @param  string  $group  日志配置
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
 function logger(string $name = 'default', string $group = 'default'): LoggerInterface
 {
-    return make(LoggerFactory::class)
+    return app()->get(LoggerFactory::class)
         ->get($name, $group);
 }
 
 /**
+ * 控制台日志输出
  * StdoutLogger.
+ *
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
 function stdoutLogger(): StdoutLoggerInterface
 {
-    return make(StdoutLoggerInterface::class);
+    return app()->get(StdoutLoggerInterface::class);
+}
+
+/**
+ * redis 用例.
+ *
+ * @param  string  $driver  redis实例
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
+ */
+function redis(string $driver = 'default'): RedisProxy
+{
+    return app()->get(RedisFactory::class)->get($driver);
 }
 
 /**
  * 获取缓存驱动.
+ * @return CacheInterface
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
-function cache()
+function cache(): CacheInterface
 {
-    return make(CacheInterface::class);
+    return app()->get(CacheInterface::class);
+}
+
+/**
+ * 记住数据.
+ *
+ * @param  string  $key  缓存KEY
+ * @param  DateInterval|int|null  $ttl  缓存时间
+ * @throws ContainerExceptionInterface
+ * @throws InvalidArgumentException
+ * @throws NotFoundExceptionInterface
+ */
+function remember(string $key, DateInterval|int|null $ttl, Closure $closure): mixed
+{
+    if (!empty($value = cache()->get($key))) {
+        return $value;
+    }
+
+    $value = $closure();
+
+    cache()->set(key: $key, value: $value, ttl: $ttl);
+
+    return $value;
+}
+
+/**
+ * 长期记得.
+ * @param  string  $key
+ * @param  Closure  $callback
+ * @return mixed
+ * @throws ContainerExceptionInterface
+ * @throws InvalidArgumentException
+ * @throws NotFoundExceptionInterface
+ */
+function rememberForever(string $key, Closure $callback): mixed
+{
+    return remember(key: $key, ttl: null, closure: $callback);
 }
 
 /**
  * 触发事件.
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
 function event(object $event): void
 {
-    make(EventDispatcherInterface::class)->dispatch($event);
+    app()->get(EventDispatcherInterface::class)->dispatch($event);
 }
 
 /**
  * 获取真实ip.
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
 function realIp(mixed $request = null): mixed
 {
-    $request = $request ?? make(RequestInterface::class);
+    $request = $request ?? app()->get(RequestInterface::class);
 
     $ip = $request->getHeader('x-forwarded-for');
 
@@ -142,52 +202,37 @@ function realIp(mixed $request = null): mixed
 /**
  * 投递队列.
  *
- * @param Job $job 异步Job
- * @param int $delay 延迟时间-秒
- * @param string $driver 消息队列驱动
+ * @param  Job  $job  异步Job
+ * @param  int  $delay  延迟时间-秒
+ * @param  string  $driver  消息队列驱动
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
-function asyncQueue(Job $job, int $delay = 0, string $driver = 'default'): void
+function queue(Job $job, int $delay = 0, string $driver = 'default'): bool
 {
-    make(DriverFactory::class)->get($driver)->push($job, $delay);
+    return app()->get(DriverFactory::class)->get($driver)->push($job, $delay);
 }
 
 /**
  * 页面重定向.
  *
- * @param string $url 跳转URL
- * @param int $status HTTP状态码
- * @param string $schema 协议
+ * @param  string  $url  跳转URL
+ * @param  int  $status  HTTP状态码
+ * @param  string  $schema  协议
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
 function redirect(string $url, int $status = 302, string $schema = 'http'): ResponseInterface
 {
-    return make(\Hyperf\HttpServer\Contract\ResponseInterface::class)
+    return app()->get(\Hyperf\HttpServer\Contract\ResponseInterface::class)
         ->redirect($url, $status, $schema);
-}
-
-/**
- * 数据缓存.
- *
- * @param string $key 缓存KEY
- * @param null|DateInterval|int $ttl 缓存时间
- */
-function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mixed
-{
-    if (! empty($value = cache()->get($key))) {
-        return $value;
-    }
-
-    $value = $closure();
-
-    cache()->set($key, $value, $ttl);
-
-    return $value;
 }
 
 /**
  * 修改配置项.
  *
- * @param string $key identifier of the entry to set
- * @param mixed $value the value that save to container
+ * @param  string  $key  identifier of the entry to set
+ * @param  mixed  $value  the value that save to container
  *
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
@@ -200,9 +245,9 @@ function configSet(string $key, mixed $value): void
 /**
  * 如果给定条件为真，则抛出给定异常。
  *
- * @param mixed $condition 判断条件
- * @param string|Throwable $exception 指定异常信息(RuntimeException)|抛出异常
- * @param mixed ...$parameters 异常自定义参数
+ * @param  mixed  $condition  判断条件
+ * @param  string|Throwable  $exception  指定异常信息(RuntimeException)|抛出异常
+ * @param  mixed  ...$parameters  异常自定义参数
  *
  * @return mixed 返回条件数据
  * @throws Throwable
@@ -229,21 +274,11 @@ function abort(string $message, int $code = 500): void
 }
 
 /**
- * redis 用例.
+ * 获取指定注释(Annotation).
  *
- * @param string $driver redis实例
- */
-function redis(string $driver = 'default'): RedisProxy
-{
-    return make(RedisFactory::class)->get($driver);
-}
-
-/**
- * 获取指定 annotation.
- *
- * @param string $class 查询类
- * @param string $method 查询方法
- * @param string $annotationTarget 指定注解类
+ * @param  string  $class  查询类
+ * @param  string  $method  查询方法
+ * @param  string  $annotationTarget  指定注解类
  *
  * @throws AnnotationException
  */
@@ -262,7 +297,7 @@ function annotationCollector(
     }
 
     $classAnnotation = AnnotationCollector::getClassAnnotations($class)[$annotationTarget] ?? null;
-    if (! $classAnnotation instanceof $annotationTarget) {
+    if (!$classAnnotation instanceof $annotationTarget) {
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
