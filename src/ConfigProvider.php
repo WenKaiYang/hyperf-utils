@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Ella123\HyperfUtils;
 
+use Hyperf\Session\Middleware\SessionMiddleware;
+
 class ConfigProvider
 {
     public function __invoke(): array
@@ -20,6 +22,11 @@ class ConfigProvider
             'dependencies' => [
             ],
             'commands' => [
+            ],
+            'middlewares' => [
+                'http' => [
+                    SessionMiddleware::class,
+                ],
             ],
             'annotations' => [
                 'scan' => [
