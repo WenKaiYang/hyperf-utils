@@ -40,9 +40,9 @@ use RuntimeException;
 use Throwable;
 
 /**
- * 是否为空.
+ * 是否空白.
  */
-function blank(mixed $value): bool
+function isBlank(mixed $value): bool
 {
     if (is_null($value)) {
         return true;
@@ -68,7 +68,7 @@ function blank(mixed $value): bool
  */
 function arrayFilterFilled(array $array): array
 {
-    return array_filter($array, static fn($item) => !blank($item));
+    return array_filter($array, static fn ($item) => ! isBlank($item));
 }
 
 /**
@@ -81,7 +81,6 @@ function app(): ContainerInterface
 
 /**
  * 日志组件.
- *
  * @param string $group 日志配置
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
@@ -102,6 +101,16 @@ function logger(string $name = 'default', string $group = 'default'): LoggerInte
 function stdoutLogger(): StdoutLoggerInterface
 {
     return app()->get(StdoutLoggerInterface::class);
+}
+
+/**
+ * 控制台日志输出(别名).
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
+ */
+function stdLogger(): StdoutLoggerInterface
+{
+    return stdoutLogger();
 }
 
 /**
@@ -137,7 +146,7 @@ function cache(): CacheInterface
  */
 function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mixed
 {
-    if (!empty($value = cache()->get($key))) {
+    if (! empty($value = cache()->get($key))) {
         return $value;
     }
 
@@ -157,16 +166,6 @@ function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mi
 function rememberForever(string $key, Closure $callback): mixed
 {
     return remember(key: $key, ttl: null, closure: $callback);
-}
-
-/**
- * 触发事件.
- * @throws ContainerExceptionInterface
- * @throws NotFoundExceptionInterface
- */
-function event(object $event): void
-{
-    app()->get(EventDispatcherInterface::class)->dispatch($event);
 }
 
 /**
@@ -195,7 +194,7 @@ function request(): RequestInterface
 }
 
 /**
- * 提交请求参数
+ * 请求参数.
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
  */
@@ -206,7 +205,6 @@ function input(string $key, mixed $default = null)
 
 /**
  * 投递队列.
- *
  * @param Job $job 异步Job
  * @param int $delay 延迟时间-秒
  * @param string $driver 消息队列驱动
@@ -219,8 +217,17 @@ function queue(Job $job, int $delay = 0, string $driver = 'default'): bool
 }
 
 /**
+ * 触发事件.
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
+ */
+function event(object $event): void
+{
+    app()->get(EventDispatcherInterface::class)->dispatch($event);
+}
+
+/**
  * 页面重定向.
- *
  * @param string $url 跳转URL
  * @param int $status HTTP状态码
  * @param string $schema 协议
@@ -235,7 +242,6 @@ function redirect(string $url, int $status = 302, string $schema = 'http'): Resp
 
 /**
  * 修改配置项.
- *
  * @param string $key identifier of the entry to set
  * @param mixed $value the value that save to container
  *
@@ -249,7 +255,6 @@ function configSet(string $key, mixed $value): void
 
 /**
  * 如果给定条件为真，则抛出给定异常。
- *
  * @param mixed $condition 判断条件
  * @param string|Throwable $exception 指定异常信息(RuntimeException)|抛出异常
  * @param mixed ...$parameters 异常自定义参数
@@ -281,7 +286,6 @@ function abort(Exception|string $message, int $code = 500): void
 
 /**
  * 获取指定注释(Annotation).
- *
  * @param string $class 查询类
  * @param string $method 查询方法
  * @param string $annotationTarget 指定注解类
@@ -292,8 +296,7 @@ function annotationCollector(
     string $class,
     string $method,
     string $annotationTarget
-): AbstractAnnotation
-{
+): AbstractAnnotation {
     $methodAnnotation = AnnotationCollector::getClassMethodAnnotation(
         $class,
         $method
@@ -304,7 +307,7 @@ function annotationCollector(
     }
 
     $classAnnotation = AnnotationCollector::getClassAnnotations($class)[$annotationTarget] ?? null;
-    if (!$classAnnotation instanceof $annotationTarget) {
+    if (! $classAnnotation instanceof $annotationTarget) {
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
