@@ -176,12 +176,32 @@ function event(object $event): void
  */
 function realIp(mixed $request = null): string
 {
-    $request = $request ?? app()->get(RequestInterface::class);
+    $request = $request ?? request();
     /** @var RequestInterface $request */
     return $request->getHeaderLine('X-Forwarded-For')
         ?: $request->getHeaderLine('X-Real-IP')
             ?: ($request->getServerParams()['remote_addr'] ?? '')
                 ?: '127.0.0.1';
+}
+
+/**
+ * 请求对象
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
+ */
+function request(): RequestInterface
+{
+    return app()->get(RequestInterface::class);
+}
+
+/**
+ * 提交请求参数
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
+ */
+function input(string $key, mixed $default = null)
+{
+    return request()->input(key: $key, default: $default);
 }
 
 /**
