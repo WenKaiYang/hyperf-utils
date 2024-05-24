@@ -174,7 +174,7 @@ function event(object $event): void
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
  */
-function realIp(mixed $request = null): mixed
+function realIp(mixed $request = null): string
 {
     $request = $request ?? app()->get(RequestInterface::class);
     /** @var RequestInterface $request */
