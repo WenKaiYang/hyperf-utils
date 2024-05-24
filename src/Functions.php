@@ -184,6 +184,16 @@ function realIp(mixed $request = null): string
 }
 
 /**
+ * 获取真实ip(别名).
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
+ */
+function ip(mixed $request = null): string
+{
+    return realIp($request);
+}
+
+/**
  * 请求对象
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
