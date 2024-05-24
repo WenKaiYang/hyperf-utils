@@ -18,14 +18,13 @@ use DateInterval;
 use Exception;
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\AsyncQueue\Job;
-use Hyperf\Collection\Arr;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Hyperf\Di\Annotation\AnnotationCollector;
 use Hyperf\Di\Exception\AnnotationException;
-use Hyperf\Engine\Contract\Http\V2\RequestInterface;
+use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Logger\LoggerFactory;
 use Hyperf\Redis\RedisFactory;
 use Hyperf\Redis\RedisProxy;
@@ -69,7 +68,7 @@ function blank(mixed $value): bool
  */
 function arrayFilterFilled(array $array): array
 {
-    return array_filter($array, static fn ($item) => ! blank($item));
+    return array_filter($array, static fn($item) => !blank($item));
 }
 
 /**
@@ -138,7 +137,7 @@ function cache(): CacheInterface
  */
 function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mixed
 {
-    if (! empty($value = cache()->get($key))) {
+    if (!empty($value = cache()->get($key))) {
         return $value;
     }
 
@@ -178,22 +177,11 @@ function event(object $event): void
 function realIp(mixed $request = null): mixed
 {
     $request = $request ?? app()->get(RequestInterface::class);
-
-    $ip = $request->getHeader('x-forwarded-for');
-
-    if (empty($ip)) {
-        $ip = $request->getHeader('x-real-ip');
-    }
-
-    if (empty($ip)) {
-        $ip = $request->getServerParams()['remote_addr'] ?? '127.0.0.1';
-    }
-
-    if (is_array($ip)) {
-        $ip = Arr::first($ip);
-    }
-
-    return Arr::first(explode(',', $ip));
+    /** @var RequestInterface $request */
+    return $request->getHeaderLine('X-Forwarded-For')
+        ?: $request->getHeaderLine('X-Real-IP')
+            ?: ($request->getServerParams()['remote_addr'] ?? '')
+                ?: '127.0.0.1';
 }
 
 /**
@@ -284,7 +272,8 @@ function annotationCollector(
     string $class,
     string $method,
     string $annotationTarget
-): AbstractAnnotation {
+): AbstractAnnotation
+{
     $methodAnnotation = AnnotationCollector::getClassMethodAnnotation(
         $class,
         $method
@@ -295,7 +284,7 @@ function annotationCollector(
     }
 
     $classAnnotation = AnnotationCollector::getClassAnnotations($class)[$annotationTarget] ?? null;
-    if (! $classAnnotation instanceof $annotationTarget) {
+    if (!$classAnnotation instanceof $annotationTarget) {
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
