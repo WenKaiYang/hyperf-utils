@@ -16,6 +16,7 @@ use Closure;
 use Countable;
 use DateInterval;
 use Exception;
+use GuzzleHttp\Client;
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\AsyncQueue\Job;
 use Hyperf\Context\ApplicationContext;
@@ -24,6 +25,7 @@ use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Hyperf\Di\Annotation\AnnotationCollector;
 use Hyperf\Di\Exception\AnnotationException;
+use Hyperf\Guzzle\ClientFactory;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Logger\LoggerFactory;
 use Hyperf\Redis\RedisFactory;
@@ -38,6 +40,7 @@ use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Throwable;
+use function Hyperf\Support\make;
 
 /**
  * 是否空白.
@@ -342,4 +345,14 @@ function annotationCollector(
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
+}
+
+/**
+ * http客户端
+ * @param array $options
+ * @return Client
+ */
+function httpClient(array $options = []): Client
+{
+    return make(ClientFactory::class)->create($options);
 }

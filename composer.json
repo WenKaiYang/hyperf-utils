@@ -26,6 +26,7 @@
     "hyperf/contract": "^3.1",
     "hyperf/di": "3.1.*",
     "hyperf/framework": "3.1.*",
+    "hyperf/guzzle": "^3.1",
     "hyperf/http-server": "^3.1",
     "hyperf/logger": "^3.1",
     "hyperf/redis": "^3.1",
