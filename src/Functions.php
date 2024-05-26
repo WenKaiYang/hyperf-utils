@@ -68,7 +68,7 @@ function isBlank(mixed $value): bool
  */
 function arrayFilterFilled(array $array): array
 {
-    return array_filter($array, static fn ($item) => ! isBlank($item));
+    return array_filter($array, static fn($item) => !isBlank($item));
 }
 
 /**
@@ -146,7 +146,7 @@ function cache(): CacheInterface
  */
 function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mixed
 {
-    if (! empty($value = cache()->get($key))) {
+    if (!empty($value = cache()->get($key))) {
         return $value;
     }
 
@@ -224,6 +224,16 @@ function input(string $key, mixed $default = null)
 function queue(Job $job, int $delay = 0, string $driver = 'default'): bool
 {
     return app()->get(DriverFactory::class)->get($driver)->push($job, $delay);
+}
+
+/**
+ * 投递队列(别名)
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
+ */
+function job(Job $job, int $delay = 0, string $driver = 'default'): bool
+{
+    return queue($job, $delay, $driver);
 }
 
 /**
@@ -306,7 +316,8 @@ function annotationCollector(
     string $class,
     string $method,
     string $annotationTarget
-): AbstractAnnotation {
+): AbstractAnnotation
+{
     $methodAnnotation = AnnotationCollector::getClassMethodAnnotation(
         $class,
         $method
@@ -317,7 +328,7 @@ function annotationCollector(
     }
 
     $classAnnotation = AnnotationCollector::getClassAnnotations($class)[$annotationTarget] ?? null;
-    if (! $classAnnotation instanceof $annotationTarget) {
+    if (!$classAnnotation instanceof $annotationTarget) {
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
