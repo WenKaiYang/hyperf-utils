@@ -20,7 +20,7 @@ use GuzzleHttp\Client;
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\AsyncQueue\Job;
 use Hyperf\Context\ApplicationContext;
-use Hyperf\Contract\ConfigInterface;
+use Hyperf\Context\Context;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Hyperf\Di\Annotation\AnnotationCollector;
@@ -40,6 +40,7 @@ use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Throwable;
+
 use function Hyperf\Support\make;
 
 /**
@@ -71,7 +72,7 @@ function isBlank(mixed $value): bool
  */
 function arrayFilterFilled(array $array): array
 {
-    return array_filter($array, static fn($item) => !isBlank($item));
+    return array_filter($array, static fn ($item) => ! isBlank($item));
 }
 
 /**
@@ -80,6 +81,14 @@ function arrayFilterFilled(array $array): array
 function app(): ContainerInterface
 {
     return ApplicationContext::getContainer();
+}
+
+/**
+ * 协程上下文.
+ */
+function context(string $id): mixed
+{
+    return Context::has($id) ? Context::get($id) : make($id);
 }
 
 /**
@@ -149,7 +158,7 @@ function cache(): CacheInterface
  */
 function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mixed
 {
-    if (!empty($value = cache()->get($key))) {
+    if (! empty($value = cache()->get($key))) {
         return $value;
     }
 
@@ -173,8 +182,6 @@ function rememberForever(string $key, Closure $callback): mixed
 
 /**
  * 获取真实ip.
- * @throws ContainerExceptionInterface
- * @throws NotFoundExceptionInterface
  */
 function realIp(mixed $request = null): string
 {
@@ -188,8 +195,6 @@ function realIp(mixed $request = null): string
 
 /**
  * 获取真实ip(别名).
- * @throws ContainerExceptionInterface
- * @throws NotFoundExceptionInterface
  */
 function ip(mixed $request = null): string
 {
@@ -198,18 +203,14 @@ function ip(mixed $request = null): string
 
 /**
  * 请求对象
- * @throws ContainerExceptionInterface
- * @throws NotFoundExceptionInterface
  */
 function request(): RequestInterface
 {
-    return app()->get(RequestInterface::class);
+    return \Ella123\HyperfUtils\context(RequestInterface::class);
 }
 
 /**
  * 请求参数.
- * @throws ContainerExceptionInterface
- * @throws NotFoundExceptionInterface
  */
 function input(string $key, mixed $default = null)
 {
@@ -230,7 +231,7 @@ function queue(Job $job, int $delay = 0, string $driver = 'default'): bool
 }
 
 /**
- * 投递队列(别名)
+ * 投递队列(别名).
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
  */
@@ -250,7 +251,7 @@ function event(object $event): object
 }
 
 /**
- * 触发事件(别名)
+ * 触发事件(别名).
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
  */
@@ -269,21 +270,8 @@ function dispatch(object $event): object
  */
 function redirect(string $url, int $status = 302, string $schema = 'http'): ResponseInterface
 {
-    return app()->get(\Hyperf\HttpServer\Contract\ResponseInterface::class)
+    return \Ella123\HyperfUtils\context(\Hyperf\HttpServer\Contract\ResponseInterface::class)
         ->redirect($url, $status, $schema);
-}
-
-/**
- * 修改配置项.
- * @param string $key identifier of the entry to set
- * @param mixed $value the value that save to container
- *
- * @throws ContainerExceptionInterface
- * @throws NotFoundExceptionInterface
- */
-function configSet(string $key, mixed $value): void
-{
-    app()->get(ConfigInterface::class)->set($key, $value);
 }
 
 /**
@@ -329,8 +317,7 @@ function annotationCollector(
     string $class,
     string $method,
     string $annotationTarget
-): AbstractAnnotation
-{
+): AbstractAnnotation {
     $methodAnnotation = AnnotationCollector::getClassMethodAnnotation(
         $class,
         $method
@@ -341,16 +328,14 @@ function annotationCollector(
     }
 
     $classAnnotation = AnnotationCollector::getClassAnnotations($class)[$annotationTarget] ?? null;
-    if (!$classAnnotation instanceof $annotationTarget) {
+    if (! $classAnnotation instanceof $annotationTarget) {
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
 }
 
 /**
- * http客户端
- * @param array $options
- * @return Client
+ * http客户端.
  */
 function httpClient(array $options = []): Client
 {
