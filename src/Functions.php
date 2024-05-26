@@ -241,9 +241,19 @@ function job(Job $job, int $delay = 0, string $driver = 'default'): bool
  * @throws ContainerExceptionInterface
  * @throws NotFoundExceptionInterface
  */
-function event(object $event): void
+function event(object $event): object
 {
-    app()->get(EventDispatcherInterface::class)->dispatch($event);
+    return app()->get(EventDispatcherInterface::class)->dispatch($event);
+}
+
+/**
+ * 触发事件(别名)
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
+ */
+function dispatch(object $event): object
+{
+    return event($event);
 }
 
 /**
