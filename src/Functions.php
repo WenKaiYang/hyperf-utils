@@ -85,10 +85,11 @@ function app(): ContainerInterface
 
 /**
  * 协程上下文.
+ * @param null|mixed $default
  */
-function context(string $id): mixed
+function context(string $id, $default = null): mixed
 {
-    return Context::has($id) ? Context::get($id) : make($id);
+    return Context::has($id) ? Context::get($id) : Context::set($id, $default ?: make($id));
 }
 
 /**
