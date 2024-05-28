@@ -40,7 +40,6 @@ use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Throwable;
-
 use function Hyperf\Support\make;
 
 /**
@@ -72,7 +71,7 @@ function isBlank(mixed $value): bool
  */
 function arrayFilterFilled(array $array): array
 {
-    return array_filter($array, static fn ($item) => ! isBlank($item));
+    return array_filter($array, static fn($item) => !isBlank($item));
 }
 
 /**
@@ -89,8 +88,7 @@ function app(): ContainerInterface
  */
 function context(string $id, mixed $default = null): mixed
 {
-    return Context::has($id) ? Context::get($id)
-        : Context::set($id, $default ?: make($id));
+    return Context::getOrSet($id, $default ?: make($id));
 }
 
 /**
@@ -160,7 +158,7 @@ function cache(): CacheInterface
  */
 function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mixed
 {
-    if (! empty($value = cache()->get($key))) {
+    if (!empty($value = cache()->get($key))) {
         return $value;
     }
 
@@ -319,7 +317,8 @@ function annotationCollector(
     string $class,
     string $method,
     string $annotationTarget
-): AbstractAnnotation {
+): AbstractAnnotation
+{
     $methodAnnotation = AnnotationCollector::getClassMethodAnnotation(
         $class,
         $method
@@ -330,7 +329,7 @@ function annotationCollector(
     }
 
     $classAnnotation = AnnotationCollector::getClassAnnotations($class)[$annotationTarget] ?? null;
-    if (! $classAnnotation instanceof $annotationTarget) {
+    if (!$classAnnotation instanceof $annotationTarget) {
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
