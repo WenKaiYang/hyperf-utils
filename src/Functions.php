@@ -342,3 +342,19 @@ function httpClient(array $options = []): Client
 {
     return make(ClientFactory::class)->create($options);
 }
+
+/**
+ * 时间戳转换.
+ * @param string|int $timestamp
+ * @param string $format
+ * @return string
+ */
+function timestampToDate(string|int $timestamp, string $format = "Y-m-d H:i:s"): string
+{
+    // 判断时间戳单位
+    if (strlen((string)$timestamp) > 10) {
+        // 毫秒级时间戳
+        $timestamp = $timestamp / 1000;
+    }
+    return date(format: $format, timestamp: (int)$timestamp);
+}
