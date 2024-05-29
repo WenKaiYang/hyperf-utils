@@ -40,6 +40,7 @@ use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Throwable;
+
 use function Hyperf\Support\make;
 
 /**
@@ -71,7 +72,7 @@ function isBlank(mixed $value): bool
  */
 function arrayFilterFilled(array $array): array
 {
-    return array_filter($array, static fn($item) => !isBlank($item));
+    return array_filter($array, static fn ($item) => ! isBlank($item));
 }
 
 /**
@@ -84,7 +85,6 @@ function app(): ContainerInterface
 
 /**
  * 协程上下文.
- * @param mixed|null $default
  */
 function context(string $id, mixed $default = null): mixed
 {
@@ -158,7 +158,7 @@ function cache(): CacheInterface
  */
 function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mixed
 {
-    if (!empty($value = cache()->get($key))) {
+    if (! empty($value = cache()->get($key))) {
         return $value;
     }
 
@@ -317,8 +317,7 @@ function annotationCollector(
     string $class,
     string $method,
     string $annotationTarget
-): AbstractAnnotation
-{
+): AbstractAnnotation {
     $methodAnnotation = AnnotationCollector::getClassMethodAnnotation(
         $class,
         $method
@@ -329,7 +328,7 @@ function annotationCollector(
     }
 
     $classAnnotation = AnnotationCollector::getClassAnnotations($class)[$annotationTarget] ?? null;
-    if (!$classAnnotation instanceof $annotationTarget) {
+    if (! $classAnnotation instanceof $annotationTarget) {
         throw new AnnotationException("Annotation {$annotationTarget} couldn't be collected successfully.");
     }
     return $classAnnotation;
@@ -345,16 +344,13 @@ function httpClient(array $options = []): Client
 
 /**
  * 时间戳转换.
- * @param string|int $timestamp
- * @param string $format
- * @return string
  */
-function timestampToDate(string|int $timestamp, string $format = "Y-m-d H:i:s"): string
+function timestampToDate(int|string $timestamp, string $format = 'Y-m-d H:i:s'): string
 {
     // 判断时间戳单位
-    if (strlen((string)$timestamp) > 10) {
+    if (strlen((string) $timestamp) > 10) {
         // 毫秒级时间戳
         $timestamp = $timestamp / 1000;
     }
-    return date(format: $format, timestamp: (int)$timestamp);
+    return date(format: $format, timestamp: (int) $timestamp);
 }
