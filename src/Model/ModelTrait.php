@@ -19,7 +19,6 @@ use Hyperf\Stringable\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
-
 use function Ella123\HyperfUtils\cache;
 
 /**
@@ -40,6 +39,19 @@ trait ModelTrait
     }
 
     /**
+     * 是否存在表格字段
+     * @param string $filed
+     * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     */
+    public static function hasTableField(string $filed): bool
+    {
+        return is_array($filed, static::getTableFields());
+    }
+
+    /**
      * 获取数据库表 列信息.
      * @throws InvalidArgumentException
      * @throws ContainerExceptionInterface
@@ -48,14 +60,14 @@ trait ModelTrait
     public static function getTableColumns(): array
     {
         $key = static::class . __FUNCTION__;
-        if (! $items = cache()->get($key)) {
+        if (!$items = cache()->get($key)) {
             foreach (Db::select('SHOW COLUMNS FROM ' . static::getTableName(true)) as $row) {
                 $items[$row->Field] = $row;
             }
             cache()->set($key, $items, 60);
         }
 
-        return (array) $items;
+        return (array)$items;
     }
 
     /**
@@ -64,7 +76,7 @@ trait ModelTrait
     public static function getTableName(bool $prefix = false): string
     {
         return ($prefix ? static::getPrefix() : '') . static::getInstance()
-            ->getTable();
+                ->getTable();
     }
 
     /**
@@ -72,7 +84,7 @@ trait ModelTrait
      */
     public static function getPrefix(): string
     {
-        return (string) static::query()->getConnection()->getTablePrefix();
+        return (string)static::query()->getConnection()->getTablePrefix();
     }
 
     /**
@@ -121,7 +133,6 @@ trait ModelTrait
     public static function fillData(array $attributes, null|array|Model $parent = null): array
     {
         $model = static::getInstance();
-        $fields = $model->getTableFields();
         // 模型填充
         $attributes = $model->fill($attributes)->getAttributes();
 
@@ -136,8 +147,8 @@ trait ModelTrait
             }
         }
         // ulid
-        if (array_key_exists('ulid', $fields) && ! $model->ulid) {
-            $model->setAttribute('ulid', strtolower((string) Str::ulid()));
+        if ($model->hasTableField('ulid') && !$model->ulid) {
+            $model->setAttribute('ulid', strtolower((string)Str::ulid()));
         }
         // 添加父级
         if (isset($parent['id'], $parent['node'])) {
@@ -153,6 +164,6 @@ trait ModelTrait
      */
     public static function generateUlid(): string
     {
-        return strtolower((string) Str::ulid());
+        return strtolower((string)Str::ulid());
     }
 }

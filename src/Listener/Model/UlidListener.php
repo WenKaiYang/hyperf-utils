@@ -41,9 +41,8 @@ class UlidListener implements ListenerInterface
         if ($event instanceof Creating) {
             /** @var ModelTrait $model */
             $model = $event->getModel();
-            $fields = $model->getTableFields();
-            if (array_key_exists('ulid', $fields) && ! $model->ulid) {
-                $model->setAttribute('ulid', strtolower((string) Str::ulid()));
+            if ($model->hasTableField('ulid') && !$model->ulid) {
+                $model->setAttribute('ulid', strtolower((string)Str::ulid()));
             }
         }
     }
