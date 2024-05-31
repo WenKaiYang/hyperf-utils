@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 namespace Ella123\HyperfUtils\Listener\Model;
 
-use Ella123\HyperfUtils\Model\HasUlids;
-use Ella123\HyperfUtils\Model\ModelTrait;
 use Hyperf\Database\Model\Events\Creating;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
@@ -34,10 +32,8 @@ class UlidListener implements ListenerInterface
         if ($event instanceof Creating) {
             $model = $event->getModel();
             $attributes = $model->getAttributes();
-            // ulid
-            if (array_key_exists('ulid', $attributes) && ! $attributes['ulid']) {
-                /* @var ModelTrait|HasUlids $model */
-                $model->ulid = strtolower((string) Str::ulid());
+            if (array_key_exists('ulid', $attributes) && !$attributes['ulid']) {
+                $model->attributes['ulid'] = strtolower((string)Str::ulid());
             }
         }
     }
