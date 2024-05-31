@@ -31,7 +31,6 @@ use Hyperf\Logger\LoggerFactory;
 use Hyperf\Redis\RedisFactory;
 use Hyperf\Redis\RedisProxy;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -76,19 +75,24 @@ function arrayFilterFilled(array $array): array
 }
 
 /**
- * 获取容器实例.
+ * 获取App上下文.
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
-function app(): ContainerInterface
+function app(?string $id = null): mixed
 {
-    return ApplicationContext::getContainer();
+    $container = ApplicationContext::getContainer();
+    return $id ? $container->get($id) : $container;
 }
 
 /**
  * 协程上下文.
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
 function context(string $id, mixed $default = null): mixed
 {
-    return Context::getOrSet($id, $default ?: make($id));
+    return Context::getOrSet($id, $default ?: app($id));
 }
 
 /**
@@ -134,7 +138,7 @@ function stdLogger(): StdoutLoggerInterface
  */
 function redis(string $driver = 'default'): RedisProxy
 {
-    return app()->get(RedisFactory::class)->get($driver);
+    return app(RedisFactory::class)->get($driver);
 }
 
 /**
@@ -144,7 +148,7 @@ function redis(string $driver = 'default'): RedisProxy
  */
 function cache(): CacheInterface
 {
-    return app()->get(CacheInterface::class);
+    return app(CacheInterface::class);
 }
 
 /**
@@ -227,7 +231,7 @@ function input(string $key, mixed $default = null)
  */
 function queue(Job $job, int $delay = 0, string $driver = 'default'): bool
 {
-    return app()->get(DriverFactory::class)->get($driver)->push($job, $delay);
+    return app(DriverFactory::class)->get($driver)->push($job, $delay);
 }
 
 /**
@@ -247,7 +251,7 @@ function job(Job $job, int $delay = 0, string $driver = 'default'): bool
  */
 function event(object $event): object
 {
-    return app()->get(EventDispatcherInterface::class)->dispatch($event);
+    return app(EventDispatcherInterface::class)->dispatch($event);
 }
 
 /**
@@ -270,7 +274,7 @@ function dispatch(object $event): object
  */
 function redirect(string $url, int $status = 302, string $schema = 'http'): ResponseInterface
 {
-    return \Ella123\HyperfUtils\context(\Hyperf\HttpServer\Contract\ResponseInterface::class)
+    return app(\Hyperf\HttpServer\Contract\ResponseInterface::class)
         ->redirect($url, $status, $schema);
 }
 
