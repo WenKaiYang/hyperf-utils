@@ -19,6 +19,7 @@ use Hyperf\Stringable\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
+
 use function Ella123\HyperfUtils\cache;
 
 /**
@@ -39,9 +40,7 @@ trait ModelTrait
     }
 
     /**
-     * 是否存在表格字段
-     * @param string $filed
-     * @return bool
+     * 是否存在表格字段.
      * @throws ContainerExceptionInterface
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
@@ -60,14 +59,14 @@ trait ModelTrait
     public static function getTableColumns(): array
     {
         $key = static::class . __FUNCTION__;
-        if (!$items = cache()->get($key)) {
+        if (! $items = cache()->get($key)) {
             foreach (Db::select('SHOW COLUMNS FROM ' . static::getTableName(true)) as $row) {
                 $items[$row->Field] = $row;
             }
             cache()->set($key, $items, 60);
         }
 
-        return (array)$items;
+        return (array) $items;
     }
 
     /**
@@ -76,7 +75,7 @@ trait ModelTrait
     public static function getTableName(bool $prefix = false): string
     {
         return ($prefix ? static::getPrefix() : '') . static::getInstance()
-                ->getTable();
+            ->getTable();
     }
 
     /**
@@ -84,7 +83,7 @@ trait ModelTrait
      */
     public static function getPrefix(): string
     {
-        return (string)static::query()->getConnection()->getTablePrefix();
+        return (string) static::query()->getConnection()->getTablePrefix();
     }
 
     /**
@@ -147,8 +146,8 @@ trait ModelTrait
             }
         }
         // ulid
-        if ($model->hasTableField('ulid') && !$model->ulid) {
-            $model->setAttribute('ulid', strtolower((string)Str::ulid()));
+        if (! $model->ulid && $model->hasTableField('ulid')) {
+            $model->setAttribute('ulid', strtolower((string) Str::ulid()));
         }
         // 添加父级
         if (isset($parent['id'], $parent['node'])) {
@@ -164,6 +163,6 @@ trait ModelTrait
      */
     public static function generateUlid(): string
     {
-        return strtolower((string)Str::ulid());
+        return strtolower((string) Str::ulid());
     }
 }
