@@ -32,8 +32,8 @@ class UlidListener implements ListenerInterface
         if ($event instanceof Creating) {
             $model = $event->getModel();
             $attributes = $model->getAttributes();
-            if (array_key_exists('ulid', $attributes) && !$attributes['ulid']) {
-                $model->setAttribute('ulid', strtolower((string)Str::ulid()));
+            if (array_key_exists('ulid', $attributes) && ! $attributes['ulid']) {
+                $model->setAttribute('ulid', strtolower((string) Str::ulid()));
             }
         }
     }
