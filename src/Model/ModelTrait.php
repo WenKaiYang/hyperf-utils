@@ -16,15 +16,23 @@ use Carbon\Carbon;
 use Hyperf\DbConnection\Db;
 use Hyperf\DbConnection\Model\Model;
 use Hyperf\Stringable\Str;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 use function Ella123\HyperfUtils\cache;
 
+/**
+ * @method getAttributes()
+ * @method setAttribute(string $string, $value)
+ */
 trait ModelTrait
 {
     /**
      * 获取数据库表 字段.
+     * @throws ContainerExceptionInterface
      * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      */
     public static function getTableFields(): array
     {
@@ -34,6 +42,8 @@ trait ModelTrait
     /**
      * 获取数据库表 列信息.
      * @throws InvalidArgumentException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function getTableColumns(): array
     {
@@ -75,7 +85,9 @@ trait ModelTrait
 
     /**
      * 是否包含字段.
+     * @throws ContainerExceptionInterface
      * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      */
     public static function isField(string $field): bool
     {
@@ -109,6 +121,7 @@ trait ModelTrait
     public static function fillData(array $attributes, null|array|Model $parent = null): array
     {
         $model = static::getInstance();
+        $fields = $model->getTableFields();
         // 模型填充
         $attributes = $model->fill($attributes)->getAttributes();
 
@@ -123,9 +136,8 @@ trait ModelTrait
             }
         }
         // ulid
-        if (array_key_exists('ulid', $attributes) && ! $attributes['ulid']) {
-            /* @var HasUlids $model */
-            $attributes['ulid'] = static::generateUlid();
+        if (array_key_exists('ulid', $fields) && ! $model->ulid) {
+            $model->setAttribute('ulid', strtolower((string) Str::ulid()));
         }
         // 添加父级
         if (isset($parent['id'], $parent['node'])) {

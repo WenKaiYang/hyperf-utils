@@ -12,10 +12,14 @@ declare(strict_types=1);
 
 namespace Ella123\HyperfUtils\Listener\Model;
 
+use Ella123\HyperfUtils\Model\ModelTrait;
 use Hyperf\Database\Model\Events\Creating;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Stringable\Str;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 #[Listener]
 class UlidListener implements ListenerInterface
@@ -27,12 +31,18 @@ class UlidListener implements ListenerInterface
         ];
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     */
     public function process(object $event): void
     {
         if ($event instanceof Creating) {
+            /** @var ModelTrait $model */
             $model = $event->getModel();
-            $attributes = $model->getAttributes();
-            if (array_key_exists('ulid', $attributes) && ! $attributes['ulid']) {
+            $fields = $model->getTableFields();
+            if (array_key_exists('ulid', $fields) && ! $model->ulid) {
                 $model->setAttribute('ulid', strtolower((string) Str::ulid()));
             }
         }
