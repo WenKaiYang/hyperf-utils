@@ -147,7 +147,7 @@ trait ModelTrait
         }
         // ulid
         if (! $model->ulid && $model->hasTableField('ulid')) {
-            $attributes['pid'] = strtolower((string) Str::ulid());
+            $attributes['ulid'] = strtolower((string) Str::ulid());
         }
         // 添加父级
         if (isset($parent['id'], $parent['node'])) {
