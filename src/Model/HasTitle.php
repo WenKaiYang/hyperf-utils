@@ -16,7 +16,7 @@ use Hyperf\Database\Model\Builder;
 
 /**
  * @property string $title 标题
- * @method static static|Builder queryName(?string $title)
+ * @method static static|Builder queryTitle(?string $title)
  */
 trait HasTitle
 {
