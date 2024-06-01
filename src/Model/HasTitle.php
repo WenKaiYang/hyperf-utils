@@ -16,15 +16,15 @@ use Hyperf\Database\Model\Builder;
 
 /**
  * @property string $title 标题
- * @method static static|Builder queryName(string $title)
+ * @method static static|Builder queryName(?string $title)
  */
 trait HasTitle
 {
     /**
      * 模糊查询标题.
      */
-    public function scopeQueryTitle(Builder $query, string $title): void
+    public function scopeQueryTitle(Builder $query, ?string $title = null): void
     {
-        $query->where(static::getTableName() . '.title', 'like', '%' . $title . '%');
+        $query->when($title, fn ($query) => $query->where(static::getTableName() . '.title', 'like', '%' . $title . '%'));
     }
 }
