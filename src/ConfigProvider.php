@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Ella123\HyperfUtils;
 
-use Hyperf\Session\Middleware\SessionMiddleware;
 
 class ConfigProvider
 {
@@ -25,7 +24,6 @@ class ConfigProvider
             ],
             'middlewares' => [
                 'http' => [
-                    SessionMiddleware::class,
                 ],
             ],
             'annotations' => [
