@@ -174,6 +174,22 @@ function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mi
 }
 
 /**
+ * 是否有锁
+ * @throws NotFoundExceptionInterface
+ * @throws ContainerExceptionInterface
+ * @throws InvalidArgumentException
+ */
+function hasLock(string $key, mixed $ttl = 1): bool
+{
+    $key = 'lock:' . $key;
+    if (cache()->has($key)) {
+        return true;
+    }
+    cache()->set(key: $key, value: 1, ttl: $ttl);
+    return false;
+}
+
+/**
  * 长期记得.
  * @throws ContainerExceptionInterface
  * @throws InvalidArgumentException

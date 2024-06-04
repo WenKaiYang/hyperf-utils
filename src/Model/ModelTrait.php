@@ -20,7 +20,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
-use function Ella123\HyperfUtils\cache;
+use function Ella123\HyperfUtils\remember;
 
 /**
  * @method getAttributes()
@@ -58,15 +58,14 @@ trait ModelTrait
      */
     public static function getTableColumns(): array
     {
-        $key = static::class . __FUNCTION__;
-        if (! $items = cache()->get($key)) {
+        $key = 'tableColumns:' . md5(static::class);
+        return (array) remember($key, 60, function () {
+            $items = [];
             foreach (Db::select('SHOW COLUMNS FROM ' . static::getTableName(true)) as $row) {
                 $items[$row->Field] = $row;
             }
-            cache()->set($key, $items, 60);
-        }
-
-        return (array) $items;
+            return $items;
+        });
     }
 
     /**
