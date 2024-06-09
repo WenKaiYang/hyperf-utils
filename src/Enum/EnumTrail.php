@@ -31,4 +31,16 @@ trait EnumTrail
         }
         return $names;
     }
+
+    public static function options(): array
+    {
+        $options = [];
+        foreach (static::cases() as $case) {
+            $options[] = [
+                'value' => $case->value,
+                'label' => $case->name,
+            ];
+        }
+        return $options;
+    }
 }
