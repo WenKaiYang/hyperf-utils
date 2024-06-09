@@ -27,4 +27,11 @@ trait HasTitle
     {
         $query->when($title, fn ($query) => $query->where(static::getTableName() . '.title', 'like', '%' . $title . '%'));
     }
+
+    public static function findByTitle(string $title, $columns = ['*']): ?static
+    {
+        return static::query()
+            ->where(static::getTableName() . '.title', $title)
+            ->first(columns: $columns);
+    }
 }

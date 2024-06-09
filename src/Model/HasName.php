@@ -27,4 +27,11 @@ trait HasName
     {
         $query->when($name, fn ($query) => $query->where(static::getTableName() . '.name', 'like', '%' . $name . '%'));
     }
+
+    public static function findByName(string $name, $columns = ['*']): ?static
+    {
+        return static::query()
+            ->where(static::getTableName() . '.name', $name)
+            ->first(columns: $columns);
+    }
 }
