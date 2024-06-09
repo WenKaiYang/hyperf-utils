@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Ella123\HyperfUtils;
 
-
 class ConfigProvider
 {
     public function __invoke(): array

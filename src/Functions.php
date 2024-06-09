@@ -33,7 +33,6 @@ use Hyperf\Redis\RedisProxy;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -92,7 +91,7 @@ function app(?string $id = null): mixed
  */
 function context(string $id, mixed $default = null): mixed
 {
-    return Context::getOrSet($id, $default ?: app($id));
+    return $default ? Context::getOrSet($id, $default) : (Context::get($id) ?: app($id));
 }
 
 /**
@@ -223,16 +222,20 @@ function ip(mixed $request = null): string
 
 /**
  * 请求对象
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
-function request(): RequestInterface
+function request(): ?RequestInterface
 {
-    return \Ella123\HyperfUtils\context(RequestInterface::class);
+    return context(RequestInterface::class);
 }
 
 /**
  * 请求参数.
+ * @throws ContainerExceptionInterface
+ * @throws NotFoundExceptionInterface
  */
-function input(string $key, mixed $default = null)
+function input(string $key, mixed $default = null): mixed
 {
     return request()->input(key: $key, default: $default);
 }
@@ -278,20 +281,6 @@ function event(object $event): object
 function dispatch(object $event): object
 {
     return event($event);
-}
-
-/**
- * 页面重定向.
- * @param string $url 跳转URL
- * @param int $status HTTP状态码
- * @param string $schema 协议
- * @throws ContainerExceptionInterface
- * @throws NotFoundExceptionInterface
- */
-function redirect(string $url, int $status = 302, string $schema = 'http'): ResponseInterface
-{
-    return app(\Hyperf\HttpServer\Contract\ResponseInterface::class)
-        ->redirect($url, $status, $schema);
 }
 
 /**
