@@ -43,4 +43,13 @@ trait EnumTrail
         }
         return $options;
     }
+
+    public static function keyToValue(): array
+    {
+        $items = [];
+        foreach (static::cases() as $case) {
+            $items[$case->value] = $case->name;
+        }
+        return $items;
+    }
 }
