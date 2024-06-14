@@ -21,7 +21,7 @@ use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\AsyncQueue\Job;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Context\Context;
-use Hyperf\Contract\IdGeneratorInterface;
+use Hyperf\Snowflake\IdGeneratorInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Hyperf\Di\Annotation\AnnotationCollector;
