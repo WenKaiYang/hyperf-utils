@@ -13,12 +13,16 @@ declare(strict_types=1);
 namespace Ella123\HyperfUtils\Model;
 
 use Carbon\Carbon;
+use Hyperf\Context\ApplicationContext;
+use Hyperf\Contract\IdGeneratorInterface;
 use Hyperf\DbConnection\Db;
 use Hyperf\DbConnection\Model\Model;
+use Hyperf\Snowflake\Concern\Snowflake;
 use Hyperf\Stringable\Str;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionClass;
 
 use function Ella123\HyperfUtils\remember;
 
@@ -133,6 +137,18 @@ trait ModelTrait
         $model = static::getInstance();
         // 模型填充
         $attributes = $model->fill($attributes)->getAttributes();
+        // 判断主键是否自增
+        if (! $model->getIncrementing()) {
+            $traits = (new ReflectionClass($model))->getTraits();
+            if (in_array(Snowflake::class, array_keys($traits))) {
+                // 是否雪花id
+                if (! $model->getKey()) {
+                    $container = ApplicationContext::getContainer();
+                    $generator = $container->get(IdGeneratorInterface::class);
+                    $attributes[$model->getKeyName()] = $generator->generate();
+                }
+            }
+        }
 
         // 添加时间
         if ($model->usesTimestamps()) {
