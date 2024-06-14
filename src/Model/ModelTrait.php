@@ -13,8 +13,6 @@ declare(strict_types=1);
 namespace Ella123\HyperfUtils\Model;
 
 use Carbon\Carbon;
-use Hyperf\Context\ApplicationContext;
-use Hyperf\Contract\IdGeneratorInterface;
 use Hyperf\DbConnection\Db;
 use Hyperf\DbConnection\Model\Model;
 use Hyperf\Snowflake\Concern\Snowflake;
@@ -25,6 +23,7 @@ use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionClass;
 
 use function Ella123\HyperfUtils\remember;
+use function Ella123\HyperfUtils\snowflakeId;
 
 /**
  * @method getAttributes()
@@ -143,9 +142,7 @@ trait ModelTrait
             if (in_array(Snowflake::class, array_keys($traits))) {
                 // 是否雪花id
                 if (! $model->getKey()) {
-                    $container = ApplicationContext::getContainer();
-                    $generator = $container->get(IdGeneratorInterface::class);
-                    $attributes[$model->getKeyName()] = $generator->generate();
+                    $attributes[$model->getKeyName()] = snowflakeId();
                 }
             }
         }
