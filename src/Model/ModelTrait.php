@@ -138,7 +138,7 @@ trait ModelTrait
         $attributes = $model->fill($attributes)->getAttributes();
         // 判断主键是否自增
         if (! $model->getIncrementing()) {
-            $traits = (new ReflectionClass($model))->getTraits();
+            $traits = (new ReflectionClass($model))->getTraitNames();
             if (in_array(Snowflake::class, array_keys($traits))) {
                 // 是否雪花id
                 if (! $model->getKey()) {

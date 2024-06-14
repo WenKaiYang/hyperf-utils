@@ -47,7 +47,7 @@ class TreeListener implements ListenerInterface
     {
         if ($event instanceof Event) {
             $model = $event->getModel();
-            $traits = (new ReflectionClass($model))->getTraits();
+            $traits = (new ReflectionClass($model))->getTraitNames();
             if (! in_array(TreeTrait::class, array_keys($traits))) {
                 // 排除 其他类型
                 return;
