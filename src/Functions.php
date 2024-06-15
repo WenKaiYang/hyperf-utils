@@ -21,7 +21,6 @@ use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\AsyncQueue\Job;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Context\Context;
-use Hyperf\Snowflake\IdGeneratorInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Hyperf\Di\Annotation\AnnotationCollector;
@@ -31,6 +30,7 @@ use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Logger\LoggerFactory;
 use Hyperf\Redis\RedisFactory;
 use Hyperf\Redis\RedisProxy;
+use Hyperf\Snowflake\IdGeneratorInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -372,9 +372,8 @@ function snowflakeId(): int
     return app(IdGeneratorInterface::class)->generate();
 }
 
-
 /**
- * 字符串加密
+ * 字符串加密.
  */
 function encrypt(string $data, string $key): string
 {
@@ -384,10 +383,10 @@ function encrypt(string $data, string $key): string
 }
 
 /**
- * 字符串解密
+ * 字符串解密.
  */
 function decrypt(string $data, string $key): false|string
 {
-    list($encrypted_data, $iv) = explode('::', base64_decode($data), 2);
+    [$encrypted_data, $iv] = explode('::', base64_decode($data), 2);
     return openssl_decrypt($encrypted_data, 'aes-256-cbc', $key, 0, $iv);
 }
