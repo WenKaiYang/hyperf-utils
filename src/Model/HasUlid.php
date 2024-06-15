@@ -17,12 +17,12 @@ namespace Ella123\HyperfUtils\Model;
  */
 trait HasUlid
 {
-    public static function findUlid(string $ulid, array $columns = ['*']): ?static
+    public static function findByUlid(string $ulid, array $columns = ['*']): ?static
     {
         return static::where(static::getTableName() . '.ulid', $ulid)->first($columns);
     }
 
-    public static function findUlidOrFail(string $ulid, array $columns = ['*']): static
+    public static function findByUlidOrFail(string $ulid, array $columns = ['*']): static
     {
         return static::where(static::getTableName() . '.ulid', $ulid)->firstOrFail($columns);
     }
