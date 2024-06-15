@@ -371,3 +371,23 @@ function snowflakeId(): int
 {
     return app(IdGeneratorInterface::class)->generate();
 }
+
+
+/**
+ * 字符串加密
+ */
+function encrypt(string $data, string $key): string
+{
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+    $encrypted = openssl_encrypt($data, 'aes-256-cbc', $key, 0, $iv);
+    return base64_encode($encrypted . '::' . $iv);
+}
+
+/**
+ * 字符串解密
+ */
+function decrypt(string $data, string $key): false|string
+{
+    list($encrypted_data, $iv) = explode('::', base64_decode($data), 2);
+    return openssl_decrypt($encrypted_data, 'aes-256-cbc', $key, 0, $iv);
+}
