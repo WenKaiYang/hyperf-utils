@@ -38,10 +38,15 @@ trait EnumTrail
         foreach (static::cases() as $case) {
             $options[] = [
                 'value' => $case->value,
-                'label' => $case->name,
+                'label' => $case->label($case->value),
             ];
         }
         return $options;
+    }
+
+    public static function label($value): string
+    {
+        return _('enum.' . $value);
     }
 
     public static function keyToValue(): array

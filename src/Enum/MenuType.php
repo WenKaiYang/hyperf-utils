@@ -18,4 +18,13 @@ enum MenuType: string
 
     case MENU = 'menu'; // 菜单
     case BUTTON = 'button'; // 按钮
+
+    public static function label($value): string
+    {
+        return match ($value) {
+            self::MENU->value => '菜单',
+            self::BUTTON->value => '按钮',
+            default => (string) $value,
+        };
+    }
 }
