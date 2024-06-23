@@ -364,6 +364,7 @@ function timestampToDate(int|string $timestamp, string $format = 'Y-m-d H:i:s'):
     }
     return date(format: $format, timestamp: (int) $timestamp);
 }
+
 /**
  * 雪花ID.
  */
@@ -389,4 +390,10 @@ function decrypt(string $data, string $key): false|string
 {
     [$encrypted_data, $iv] = explode('::', base64_decode($data), 2);
     return openssl_decrypt($encrypted_data, 'aes-256-cbc', $key, 0, $iv);
+}
+
+/** 是否是URL */
+function isURL(string $str): bool
+{
+    return filter_var($str, FILTER_VALIDATE_URL) !== false;
 }

@@ -12,7 +12,10 @@ declare(strict_types=1);
 
 namespace Ella123\HyperfUtils\Model;
 
+use Ella123\HyperfGenerateAvatar\AvatarUtils;
 use Hyperf\Stringable\Str;
+
+use function Ella123\HyperfUtils\isURL;
 
 /**
  * @property string $avatar 头像
@@ -24,17 +27,18 @@ trait HasAvatars
         return $this->avatar ?? $this->gravatar(140);
     }
 
-    public function gravatar($size = '100'): string
+    public function gravatar(int $size = 100, ?string $username = null): string
     {
-        $hash = md5(strtolower((string) ($this->email ?: $this->name ?: Str::random())));
-        return "https://cdn.v2ex.com/gravatar/{$hash}?s={$size}";
+        ! $username && $username = $this->name
+            ?: $this->username
+                ?: $this->nickname
+                    ?: Str::random();
+
+        return AvatarUtils::generateAvatar(username: $username, size: (int) $size)->toDataUri();
     }
 
     public function setAvatarAttribute($value): void
     {
-        if (! $value) {
-            $value = $this->gravatar(140);
-        }
-        $this->attributes['avatar'] = $value;
+        $this->attributes['avatar'] = isURL($value) ? $value : '';
     }
 }
