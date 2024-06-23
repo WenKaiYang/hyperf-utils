@@ -24,7 +24,7 @@ trait HasAvatars
 {
     public function getAvatarAttribute(): string
     {
-        return $this->avatar ?? $this->gravatar(140);
+        return $this->attributes['avatar'] ?? $this->gravatar(140);
     }
 
     public function gravatar(int $size = 100, ?string $username = null): string
