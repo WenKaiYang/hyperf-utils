@@ -32,7 +32,7 @@ trait HasAvatars
         ! $username && $username = $this->name
             ?: $this->username
                 ?: $this->nickname
-                    ?: Str::random();
+                    ?: md5((string)$this->getKey());
 
         return AvatarUtils::generateAvatar(username: $username, size: (int) $size)->toDataUri();
     }
