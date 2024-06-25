@@ -13,7 +13,6 @@ declare(strict_types=1);
 namespace Ella123\HyperfUtils\Model;
 
 use Ella123\HyperfGenerateAvatar\AvatarUtils;
-
 use function Ella123\HyperfUtils\isURL;
 
 /**
@@ -23,17 +22,19 @@ trait HasAvatars
 {
     public function getAvatarAttribute(): string
     {
-        return $this->original['avatar'] ?: $this->gravatar(140);
+        return empty($this->original['avatar'])
+            ? $this->gravatar(140)
+            : $this->original['avatar'];
     }
 
     public function gravatar(int $size = 100, ?string $username = null): string
     {
-        ! $username && $username = $this->name
+        !$username && $username = $this->name
             ?: $this->username
                 ?: $this->nickname
-                    ?: md5((string) $this->getKey());
+                    ?: md5((string)$this->getKey());
 
-        return AvatarUtils::generateAvatar(username: $username, size: (int) $size)->toDataUri();
+        return AvatarUtils::generateAvatar(username: $username, size: (int)$size)->toDataUri();
     }
 
     public function setAvatarAttribute($value): void
