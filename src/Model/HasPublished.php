@@ -18,7 +18,9 @@ use Hyperf\Database\Model\Builder;
 /**
  * @property int $published 是否发布
  * @property Carbon $published_at 发布时间
+ * @property Carbon $publishedAt 发布时间
  * @property ?Carbon $expired_at 过期时间
+ * @property ?Carbon $expiredAt 过期时间
  * @method static static|Builder queryPublished(?string $published_at)
  * @method static static|Builder queryPublishedExpired(?string $published_at, ?string $expired_at)
  */
