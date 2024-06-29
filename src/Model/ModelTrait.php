@@ -33,12 +33,11 @@ use function Ella123\HyperfUtils\snowflakeId;
 trait ModelTrait
 {
     /**
-     * 获取当前模型属性.
+     * 获取当前模型属性(兼容蛇形或驼峰).
      * @param mixed $key
      */
     public function getAttribute($key)
     {
-        // 兼容蛇形（驼峰）属性
         return parent::getAttribute($key)
             ?? parent::getAttribute(StrCache::snake($key))
             ?? parent::getAttribute(StrCache::camel($key));
