@@ -21,8 +21,8 @@ use Hyperf\Database\Model\Builder;
  * @property Carbon $publishedAt 发布时间
  * @property ?Carbon $expired_at 过期时间
  * @property ?Carbon $expiredAt 过期时间
- * @method static static|Builder queryPublished(?string $published_at=null)
- * @method static static|Builder queryPublishedExpired(?string $published_at=null, ?string $expired_at=null)
+ * @method static static|Builder queryPublished(?string $published_at = null)
+ * @method static static|Builder queryPublishedExpired(?string $published_at = null, ?string $expired_at = null)
  */
 trait HasPublished
 {
