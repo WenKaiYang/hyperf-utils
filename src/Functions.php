@@ -41,6 +41,7 @@ use RuntimeException;
 use Throwable;
 
 use function Hyperf\Support\make;
+use function Hyperf\Config\config;
 
 /**
  * 是否空白.
@@ -181,12 +182,14 @@ function remember(string $key, null|DateInterval|int $ttl, Closure $closure): mi
  */
 function hasLock(string $key, mixed $ttl = 1): bool
 {
-    $key = 'lock:' . $key;
-    if (cache()->has($key)) {
-        return true;
+    $key = config('app_name') . ':lock:' . $key;
+    $cnt = redis()->incr($key);
+
+    if (redis()->ttl($key) < 0) {
+        redis()->expire($key, max($ttl, 0));
     }
-    cache()->set(key: $key, value: 1, ttl: $ttl);
-    return false;
+
+    return $cnt > 1;
 }
 
 /**
