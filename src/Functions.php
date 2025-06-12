@@ -210,10 +210,12 @@ function realIp(mixed $request = null): string
 {
     $request = $request ?? request();
     /** @var RequestInterface $request */
-    return $request->getHeaderLine('X-Forwarded-For')
+    $ip = $request->getHeaderLine('X-Forwarded-For')
         ?: $request->getHeaderLine('X-Real-IP')
             ?: ($request->getServerParams()['remote_addr'] ?? '')
                 ?: '127.0.0.1';
+    $ips = explode(',', $ip);
+    return trim(end($ips));
 }
 
 /**
